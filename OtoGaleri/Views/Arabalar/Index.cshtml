@@ -1,0 +1,141 @@
+﻿@model IEnumerable<OtoGaleri.Models.Arabalar>
+
+@{
+    ViewData["Title"] = "Araba Galerisi";
+}
+
+<h1>Araba Galerisi</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-info">Yeni Araç Ekle</a>
+</p>
+@using (Html.BeginForm("Index", "Arabalar", FormMethod.Get))
+{
+    <p>
+        Aranacak Arabanın Modeli : @Html.TextBox("Arasearch")
+        <input type="submit" value="Ara" />
+        <a asp-action="Index" class="btn btn-primary">Listeye Dön</a>
+    </p>
+}
+<br/>
+<p>
+    <label for="fiyat">Fiyat Aralığı : </label>
+    <input type="text" id="fiyat" readonly style ="border:0;font-weight:bold;"/>
+
+</p>
+
+
+
+@*<form method="get" asp-action="Index">
+    <p>
+        <input type="search" placeholder="Enter Marka..." value="@ViewData[" GetArabalarDetails"]" name="Arasearch" style="width:500px;" />
+        <input type="submit" value="Search" class="btn btn-primary"/> |
+        <a asp-action="Index">Listeye Dön</a>
+    </p>
+</form>*@     
+<div id="slider"></div>
+<table class="table" id="tblProducts">
+    <thead>
+        
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            @*<th>
+                @Html.DisplayNameFor(model => model._id)
+            </th>*@
+            <th>
+                @Html.DisplayNameFor(model => model.Marka)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Model)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Yıl)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Fiyat)
+            </th>
+            
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+            
+        <tr>
+            <td>
+                @if (item.ImageUrl != null)
+                   {
+                       <img src="@Url.Content(item.ImageUrl)" alt="Image" />
+                   }
+            </td>
+            @*<td>
+                @Html.DisplayFor(modelItem => item._id)
+            </td>*@
+            <td>
+                @Html.DisplayFor(modelItem => item.Marka)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Model)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Yıl)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fiyat)
+            </td>
+                
+            <td>
+                @Html.ActionLink("Güncelle", "Edit", new { Model=item.Model }) |
+                @Html.ActionLink("Details", "Details", new { Model=item.Model }) |
+                @Html.ActionLink("Sil", "Delete", new { Model = item.Model })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+@section Scripts{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.6.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <script>
+    $(function () {
+        $("#slider").slider({
+            range:true,
+            min : 60000,
+            max : 1200000,
+            values : [60000,2000000],
+            slide: function (event,ui) {
+                $("#fiyat").val("TL" + ui.values[0] + " -TL" + ui.values[1]);
+                var min = ui.values[0];
+                var max = ui.values[1];
+
+                $.ajax({
+                    type : 'GET',
+                    url : '/arabalar/filter/' + min + '/' + max,
+                    success: function (arabalistesi) {
+                        console.log(arabalistesi);
+                        var yenisatır = '';
+                        for(var i = 0; i < arabalistesi.length; i++){
+                            yenisatır += '<tr>';
+                            yenisatır += '<td><img src="/images">' + arabalistesi[i].imageurl + '<td>';
+                            //yenisatır += '<td>' + arabalistesi[i].id + '<td>';
+                            yenisatır += '<td>' + arabalistesi[i].marka + '<td>';
+                            yenisatır += '<td>' + arabalistesi[i].model + '<td>';
+                            yenisatır += '<td>' + arabalistesi[i].yıl + '<td>';
+                            yenisatır += '<td>' + arabalistesi[i].fiyat + '<td>';
+                            yenisatır += '</tr>';
+                        }
+                        $('#tblProducts tbody').html(yenisatır);
+                    }
+
+                })
+            }
+        })
+    })
+    </script>
+    
+
+}
